@@ -13,7 +13,7 @@ class RayTracer {
   void generateRays();
 
  public:
-  RayTracer(const Image &image);
+  explicit RayTracer(const Image &image);
   void generatePPM(const std::string &pathToImage) const;
 };
 #endif  // RAY_TRACER_H

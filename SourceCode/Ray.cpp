@@ -1,6 +1,7 @@
 #include "Ray.h"
 
 #include <cmath>
+#include <ostream>
 
 Vector::Vector() : x(0), y(0), z(0){};
 
@@ -12,6 +13,26 @@ Vector Vector::operator-(const Vector& other) const {
 
 Vector Vector::operator+(const Vector& other) const {
   return {this->x + other.x, this->y + other.y, this->z + other.z};
+}
+
+Vector Vector::operator*(const Vector& other) const {
+  return Vector(this->y * other.z - this->z * other.y,  // x
+                this->z * other.x - this->x * other.z,  // y
+                this->x * other.y - this->y * other.x   // x
+  );
+}
+
+Vector Vector::operator*(float scalar) const {
+  return Vector(this->x * scalar, this->y * scalar, this->z * scalar);
+}
+
+Vector operator*(float lhs, const Vector& rhs) {
+  return Vector(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+}
+
+std::ostream& operator<<(std::ostream& os, const Vector& vector) {
+  os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+  return os;
 }
 
 void Vector::normalize() {
