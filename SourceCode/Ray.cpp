@@ -37,9 +37,9 @@ std::ostream& operator<<(std::ostream& os, const Vector& vector) {
 
 void Vector::normalize() {
   float length = this->length();
-  this->x = this->x / this->length();
-  this->y = this->y / this->length();
-  this->z = this->z / this->length();
+  this->x = this->x / length;
+  this->y = this->y / length;
+  this->z = this->z / length;
 }
 
 float Vector::length() const {

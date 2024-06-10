@@ -1,5 +1,4 @@
-#ifndef TRIANGLE_H
-#define TRIANGLE_H
+#pragma once
 #include <array>
 
 #include "Ray.h"
@@ -15,4 +14,3 @@ class Triangle {
   Vector normalVector() const;
   float area() const;
 };
-#endif  // TRIANGLE_H

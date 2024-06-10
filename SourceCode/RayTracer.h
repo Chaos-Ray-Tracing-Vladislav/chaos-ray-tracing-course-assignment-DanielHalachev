@@ -1,5 +1,4 @@
-#ifndef RAY_TRACER_H
-#define RAY_TRACER_H
+#pragma once
 #include <string>
 #include <vector>
 
@@ -16,4 +15,3 @@ class RayTracer {
   explicit RayTracer(const Image &image);
   void generatePPM(const std::string &pathToImage) const;
 };
-#endif  // RAY_TRACER_H

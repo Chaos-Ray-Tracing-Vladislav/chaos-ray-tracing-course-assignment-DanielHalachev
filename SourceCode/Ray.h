@@ -1,5 +1,4 @@
-#ifndef RAY_H
-#define RAY_H
+#pragma once
 #include <ostream>
 struct Vector {
   float x;
@@ -36,5 +35,3 @@ struct Ray {
   Ray(const Vector &origin, const Vector &direction);
   Color generateColor() const;
 };
-
-#endif  // RAY_H

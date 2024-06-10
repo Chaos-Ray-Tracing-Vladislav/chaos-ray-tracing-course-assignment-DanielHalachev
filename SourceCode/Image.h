@@ -1,7 +1,5 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#pragma once
 struct Image {
   unsigned int width;
   unsigned int height;
 };
-#endif  // IMAGE_H
