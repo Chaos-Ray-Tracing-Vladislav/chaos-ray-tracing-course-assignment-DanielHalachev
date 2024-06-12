@@ -1,9 +1,8 @@
+#include <tracer/Triangle.h>
+
 #include <array>
 #include <iostream>
 #include <vector>
-
-#include "Ray.h"
-#include "Triangle.h"
 
 int main() {
   std::vector<std::pair<Vector, Vector>> vectorPairs = {
@@ -28,7 +27,7 @@ int main() {
   std::cout << "Task 2\n";
   for (auto& vertexTriple : vertices) {
     Triangle triangle(vertexTriple);
-    Vector normalVector = triangle.normalVector();
+    Vector normalVector = triangle.getTriangleNormal();
     normalVector.normalize();
     std::cout << normalVector << ", " << triangle.area() << "\n";
     // replace with this to avoid unnecessary computation

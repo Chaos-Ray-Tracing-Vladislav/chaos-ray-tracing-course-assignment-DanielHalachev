@@ -1,4 +1,4 @@
-#include "RayTracer.h"
+#include <tracer/RayTracer.h>
 
 #include <fstream>
 

@@ -1,14 +1,12 @@
-#include "Triangle.h"
+#include <tracer/Triangle.h>
 
 #include <algorithm>
 #include <array>
 #include <random>
 
-#include "Ray.h"
-
 Triangle::Triangle() = default;
 Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices) {
-  // I am not sure if this is the right thing to do this
+  // I am not sure if this is the right way to do this
   float slope = (this->vertices[1].x - this->vertices[0].x) * (this->vertices[2].y - this->vertices[0].y) -
                 (this->vertices[1].y - this->vertices[0].y) * (this->vertices[2].x - this->vertices[0].x);
   while (slope < 0) {
@@ -22,12 +20,12 @@ Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices) {
   // }
 }
 
-Vector Triangle::normalVector() const {
+Vector Triangle::getTriangleNormal() const {
   Vector v1 = this->vertices[1] - this->vertices[0];
   Vector v2 = this->vertices[2] - this->vertices[0];
   return v1 * v2;
 }
 
 float Triangle::area() const {
-  return this->normalVector().length() / 2;
+  return this->getTriangleNormal().length() / 2;
 }
