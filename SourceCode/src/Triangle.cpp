@@ -2,7 +2,10 @@
 
 #include <algorithm>
 #include <array>
+#include <istream>
 #include <random>
+
+#include "tracer/Vector.h"
 
 Triangle::Triangle() = default;
 Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices) {
@@ -18,6 +21,19 @@ Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices) {
   // if (this->vertices[1].y > this->vertices[2].y) {
   //   std::swap(this->vertices[1], this->vertices[2]);
   // }
+}
+
+Vector &Triangle::operator[](unsigned short i) {
+  return this->vertices[i];
+}
+
+const Vector &Triangle::operator[](unsigned short i) const {
+  return this->vertices[i];
+}
+
+std::istream &operator>>(std::istream &is, Triangle &triangle) {
+  is >> triangle.vertices[0] >> triangle.vertices[1] >> triangle.vertices[2];
+  return is;
 }
 
 Vector Triangle::getTriangleNormal() const {

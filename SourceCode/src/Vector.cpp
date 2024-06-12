@@ -1,6 +1,7 @@
 #include <tracer/Vector.h>
 
 #include <cmath>
+#include <istream>
 
 Vector::Vector() : x(0.0f), y(0.0f), z(0.0f){};
 
@@ -12,6 +13,10 @@ Vector Vector::operator-(const Vector& other) const {
 
 Vector Vector::operator+(const Vector& other) const {
   return {this->x + other.x, this->y + other.y, this->z + other.z};
+}
+
+float Vector::dot(const Vector& other) const {
+  return this->x * other.x + this->y * other.y + this->z * other.z;
 }
 
 Vector Vector::operator*(const Vector& other) const {
@@ -30,8 +35,16 @@ Vector operator*(float lhs, const Vector& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector& vector) {
-  os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+  os << "[" << vector.x << "," << vector.y << "," << vector.z << "]";
   return os;
+}
+
+std::istream& operator>>(std::istream& is, Vector& vector) {
+  char leftBracket = '[';
+  char rightBracket = ']';
+  char delim = ',';
+  is >> leftBracket >> vector.x >> delim >> vector.y >> delim >> vector.z >> rightBracket;
+  return is;
 }
 
 void Vector::normalize() {

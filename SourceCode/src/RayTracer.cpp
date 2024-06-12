@@ -1,13 +1,21 @@
 #include <tracer/RayTracer.h>
 
+#include <algorithm>
 #include <fstream>
+#include <iostream>
+#include <optional>
+#include <vector>
 
-RayTracer::RayTracer(const Image &image) : image(image) {
+#include "tracer/Utils.h"
+#include "tracer/Vector.h"
+
+RayTracer::RayTracer(const Image &image, const std::string &pathToScene) : image(image) {
   this->pixelRays.resize(this->image.height);
   for (auto &row : this->pixelRays) {
     row.resize(this->image.width);
   }
   this->generateRays();
+  this->sceneTriangles = this->sceneParser.parseScene(pathToScene);
 };
 
 void RayTracer::generateRays() {
@@ -32,13 +40,31 @@ void RayTracer::generateRays() {
 }
 
 void RayTracer::generatePPM(const std::string &pathToImage) const {
-  std::ofstream outputStream(pathToImage, std::ios_base::trunc);
+  std::ofstream outputStream(pathToImage);
   outputStream << "P3"
                << "\n"
-               << this->image.width << " " << this->image.height << "\n";
+               << this->image.width << " " << this->image.height << "\n"
+               << 255 << "\n";
   for (unsigned int pixelRow = 0; pixelRow < image.height; pixelRow++) {
     for (unsigned int pixelCol = 0; pixelCol < image.width; pixelCol++) {
-      outputStream << this->pixelRays[pixelRow][pixelCol].generateColor() << "\t";
+      std::vector<Vector> points;
+      for (auto &triangle : this->sceneTriangles) {
+        std::optional<Vector> intersectionPoint = this->pixelRays[pixelRow][pixelCol].intersectWithTriangle(triangle);
+        if (intersectionPoint.has_value()) {
+          points.push_back(intersectionPoint.value());
+        }
+      }
+      if (points.empty()) {
+        outputStream << Color::black << "\t";
+      } else {
+        auto min = std::min_element(points.begin(), points.end(), [](const Vector &a, const Vector &b) {
+          if (a.length() < b.length()) {
+            return true;
+          }
+          return false;
+        });
+        outputStream << Color::white << "\t";
+      }
     }
     outputStream << "\n";
   }

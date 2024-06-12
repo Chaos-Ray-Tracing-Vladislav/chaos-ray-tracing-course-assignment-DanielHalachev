@@ -1,6 +1,8 @@
 #pragma once
 #include <ostream>
 struct Color {
+  static const Color black;
+  static const Color white;
   unsigned short red;
   unsigned short green;
   unsigned short blue;
