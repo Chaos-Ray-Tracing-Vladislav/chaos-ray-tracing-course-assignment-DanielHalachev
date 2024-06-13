@@ -1,6 +1,7 @@
-#include <tracer/RayTracer.h>
 
-#include <algorithm>
+#include "tracer/RayTracer.h"
+
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -9,61 +10,88 @@
 #include "tracer/Utils.h"
 #include "tracer/Vector.h"
 
-RayTracer::RayTracer(const Image &image, const std::string &pathToScene) : image(image) {
+RayTracer::RayTracer(const Image &image, const Camera &camera, const std::string &pathToScene)
+    : rayUpdateRequired(true), image{image}, camera{camera} {
+  this->updateScene(pathToScene);
+};
+
+const Image &RayTracer::getImage() const {
+  return this->image;
+}
+
+Image &RayTracer::setImage() {
+  this->rayUpdateRequired = true;
+  return this->image;
+}
+
+const Camera &RayTracer::getCamera() const {
+  return this->camera;
+}
+
+Camera &RayTracer::setCamera() {
+  this->rayUpdateRequired = true;
+  return this->camera;
+}
+
+void RayTracer::updateScene(const std::string &pathToNewScene) {
+  this->sceneTriangles = this->sceneParser.parseScene(pathToNewScene);
+}
+
+void RayTracer::updateRays() {
   this->pixelRays.resize(this->image.height);
   for (auto &row : this->pixelRays) {
     row.resize(this->image.width);
   }
-  this->generateRays();
-  this->sceneTriangles = this->sceneParser.parseScene(pathToScene);
-};
+  for (unsigned int pixelRow = 0; pixelRow < this->image.height; pixelRow++) {
+    for (unsigned int pixelCol = 0; pixelCol < this->image.width; pixelCol++) {
+      float x = static_cast<float>(pixelCol) + 0.5f;
+      float y = static_cast<float>(pixelRow) + 0.5f;
 
-void RayTracer::generateRays() {
-  for (unsigned int pixelRow = 0; pixelRow < image.height; pixelRow++) {
-    for (unsigned int pixelCol = 0; pixelCol < image.width; pixelCol++) {
-      float x = pixelCol + 0.5;
-      float y = pixelRow + 0.5;
+      x = x / static_cast<float>(image.width);
+      y = y / static_cast<float>(image.height);
 
-      x = x / image.width;
-      y = y / image.height;
-
-      x = (2.0 * x) - 1.0;
-      y = 1 - (2.0 * y);
+      x = (2.0f * x) - 1.0f;
+      y = 1.0f - (2.0f * y);
 
       x = x * (static_cast<float>(image.width) / static_cast<float>(image.height));
 
       Vector direction(x, y, -1.0);
+      direction = direction * this->camera.getRotationMatrix();
       direction.normalize();
-      this->pixelRays[pixelRow][pixelCol] = Ray(Vector(0, 0, 0), direction);
+      this->pixelRays[pixelRow][pixelCol] = Ray(this->camera.getPosition(), direction);
     }
   }
+  this->rayUpdateRequired = false;
 }
 
-void RayTracer::generatePPM(const std::string &pathToImage) const {
+void RayTracer::generatePPM(const std::string &pathToImage) {
+  if (this->rayUpdateRequired == true) {
+    this->updateRays();
+  }
   std::ofstream outputStream(pathToImage);
   outputStream << "P3"
                << "\n"
                << this->image.width << " " << this->image.height << "\n"
-               << 255 << "\n";
+               << 255 << "\n";  // WTF? Doesn't work otherwise
   for (unsigned int pixelRow = 0; pixelRow < image.height; pixelRow++) {
     for (unsigned int pixelCol = 0; pixelCol < image.width; pixelCol++) {
-      std::vector<Vector> points;
+      float minDistance = INFINITY;
+      std::optional<Vector> intersectionPoint = {};
       for (auto &triangle : this->sceneTriangles) {
-        std::optional<Vector> intersectionPoint = this->pixelRays[pixelRow][pixelCol].intersectWithTriangle(triangle);
-        if (intersectionPoint.has_value()) {
-          points.push_back(intersectionPoint.value());
+        std::optional<Vector> tempIntersectionPoint =
+            this->pixelRays[pixelRow][pixelCol].intersectWithTriangle(triangle);
+        if (tempIntersectionPoint.has_value()) {
+          float distance = tempIntersectionPoint.value().length();
+          if (distance < minDistance) {
+            minDistance = distance;
+            intersectionPoint = tempIntersectionPoint.value();
+          }
         }
       }
-      if (points.empty()) {
-        outputStream << Color::black << "\t";
-      } else {
-        auto min = std::min_element(points.begin(), points.end(), [](const Vector &a, const Vector &b) {
-          if (a.length() < b.length()) {
-            return true;
-          }
-          return false;
-        });
+      if (intersectionPoint.has_value()) {
         outputStream << Color::white << "\t";
+      } else {
+        outputStream << Color::black << "\t";
       }
     }
     outputStream << "\n";

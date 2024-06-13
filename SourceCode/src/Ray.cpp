@@ -20,7 +20,8 @@ std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const
     return {};
   }
 
-  float distanceToPlane = -triangle[0].dot(triangleNormal);
+  // TODO(daniel):
+  float distanceToPlane = -(triangle[0] - this->origin).dot(triangleNormal);
 
   float t = -(this->origin.dot(triangleNormal) + distanceToPlane) / (normalDotRayDirection);
 

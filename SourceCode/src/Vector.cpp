@@ -15,6 +15,13 @@ Vector Vector::operator+(const Vector& other) const {
   return {this->x + other.x, this->y + other.y, this->z + other.z};
 }
 
+Vector& Vector::operator+=(const Vector& other) {
+  this->x += other.x;
+  this->y += other.y;
+  this->z += other.z;
+  return *this;
+}
+
 float Vector::dot(const Vector& other) const {
   return this->x * other.x + this->y * other.y + this->z * other.z;
 }
