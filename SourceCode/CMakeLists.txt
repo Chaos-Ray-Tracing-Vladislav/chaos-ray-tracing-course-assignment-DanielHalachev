@@ -1,19 +1,20 @@
-cmake_minimum_required(VERSION 3.5.0)
+# This is the main CMake
+cmake_minimum_required(VERSION 3.27.0)
 project(RayTracer VERSION 0.1.0 LANGUAGES C CXX)
 
 # include(CTest)
 # enable_testing()
 
-add_library(Ray Ray.cpp Ray.h)
-add_library(RayTracer RayTracer.cpp RayTracer.h)
-add_library(Triangle Triangle.cpp Triangle.h)
+add_subdirectory(src)
+add_subdirectory(app)
 
-add_executable(main main.cpp)
-target_link_libraries(main PUBLIC Ray)
-target_link_libraries(main PUBLIC RayTracer)
-target_link_libraries(main PUBLIC Triangle)
-target_link_libraries(RayTracer PRIVATE Ray)
-target_link_libraries(Triangle PRIVATE Ray)
+# Testing only available if this is the main app
+# Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
+    AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
