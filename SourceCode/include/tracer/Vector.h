@@ -1,11 +1,15 @@
 #pragma once
 #include <ostream>
+#include <vector>
 struct Vector {
   float x;
   float y;
   float z;
   Vector();
   Vector(float x, float y, float z);
+  explicit Vector(const std::vector<float> &values);
+  const float &operator[](const unsigned short index) const;
+  float &operator[](const unsigned short index);
   Vector operator-(const Vector &other) const;
   Vector operator+(const Vector &other) const;
   Vector &operator+=(const Vector &other);

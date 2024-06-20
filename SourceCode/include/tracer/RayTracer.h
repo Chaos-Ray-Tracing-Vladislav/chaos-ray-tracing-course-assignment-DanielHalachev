@@ -2,28 +2,20 @@
 #include <string>
 #include <vector>
 
-#include "Image.h"
 #include "Ray.h"
-#include "SceneParser.h"
-#include "Triangle.h"
+#include "SceneSettings.h"
 #include "tracer/Camera.h"
 
 class RayTracer {
  private:
   bool rayUpdateRequired;
-  Image image;
-  Camera camera;
-  SceneParser sceneParser;
-  std::vector<Triangle> sceneTriangles;
+  Scene scene;
   std::vector<std::vector<Ray>> pixelRays;
   void updateRays();
 
  public:
-  RayTracer(const Image &image, const Camera &camera, const std::string &pathToScene);
-  const Image &getImage() const;
-  Image &setImage();
+  explicit RayTracer(const std::string &pathToScene);
   const Camera &getCamera() const;
   Camera &setCamera();
-  void updateScene(const std::string &pathToNewScene);
   void generatePPM(const std::string &pathToImage);
 };

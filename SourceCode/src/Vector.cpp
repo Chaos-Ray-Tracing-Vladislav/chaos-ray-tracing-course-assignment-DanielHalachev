@@ -2,11 +2,43 @@
 
 #include <cmath>
 #include <istream>
+#include <stdexcept>
+#include <vector>
 
 Vector::Vector() : x(0.0f), y(0.0f), z(0.0f){};
 
 Vector::Vector(float x, float y, float z) : x(x), y(y), z(z){};
 
+Vector::Vector(const std::vector<float>& values) {
+  this->x = values[0];
+  this->y = values[1];
+  this->z = values[2];
+}
+
+const float& Vector::operator[](const unsigned short index) const {
+  switch (index) {
+    case 0:
+      return this->x;
+    case 1:
+      return this->y;
+    case 2:
+      return this->z;
+    default:
+      throw std::out_of_range("Invalid range");
+  }
+}
+float& Vector::operator[](const unsigned short index) {
+  switch (index) {
+    case 0:
+      return this->x;
+    case 1:
+      return this->y;
+    case 2:
+      return this->z;
+    default:
+      throw std::out_of_range("Invalid range");
+  }
+}
 Vector Vector::operator-(const Vector& other) const {
   return {this->x - other.x, this->y - other.y, this->z - other.z};
 }
@@ -56,9 +88,10 @@ std::istream& operator>>(std::istream& is, Vector& vector) {
 
 void Vector::normalize() {
   float length = this->length();
-  this->x = this->x / length;
-  this->y = this->y / length;
-  this->z = this->z / length;
+  length = 1 / length;
+  this->x = this->x * length;
+  this->y = this->y * length;
+  this->z = this->z * length;
 }
 
 float Vector::length() const {
