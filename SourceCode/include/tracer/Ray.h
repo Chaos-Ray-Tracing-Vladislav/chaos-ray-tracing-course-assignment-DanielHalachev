@@ -2,7 +2,6 @@
 
 #include <optional>
 
-#include "Utils.h"
 #include "Vector.h"
 #include "tracer/Triangle.h"
 
@@ -15,5 +14,4 @@ struct Ray {
   Ray(const Vector &origin, const Vector &direction);
   // TODO (move to Triangle.h)
   std::optional<Vector> intersectWithTriangle(const Triangle &triangle) const;
-  Color generateColor() const;
 };

@@ -8,7 +8,7 @@
 #include "tracer/Vector.h"
 
 Triangle::Triangle() = default;
-Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices), texture(Texture()) {
+Triangle::Triangle(const std::array<Vector, 3> &vertices) : vertices(vertices), texture(Texture()) {
   // I am not sure if this is the right way to do this
   // float slope = (this->vertices[1].x - this->vertices[0].x) * (this->vertices[2].y - this->vertices[0].y) -
   //               (this->vertices[1].y - this->vertices[0].y) * (this->vertices[2].x - this->vertices[0].x);
@@ -21,7 +21,15 @@ Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices), textur
   // if (this->vertices[1].y > this->vertices[2].y) {
   //   std::swap(this->vertices[1], this->vertices[2]);
   // }
-  this->normal = getNormal();
+  this->normal = calculateNormal();
+}
+
+const Texture &Triangle::getTexture() const {
+  return this->texture;
+}
+
+Texture &Triangle::setTexture() {
+  return this->texture;
 }
 
 Vector &Triangle::operator[](unsigned short i) {
@@ -32,13 +40,13 @@ const Vector &Triangle::operator[](unsigned short i) const {
   return this->vertices[i];
 }
 
-Vector Triangle::getNormal() const {
+Vector Triangle::calculateNormal() const {
   Vector v1 = this->vertices[1] - this->vertices[0];
   Vector v2 = this->vertices[2] - this->vertices[0];
   return v1 * v2;
 }
 
-Vector Triangle::getTriangleNormal() const {
+const Vector &Triangle::getTriangleNormal() const {
   return this->normal;
 }
 

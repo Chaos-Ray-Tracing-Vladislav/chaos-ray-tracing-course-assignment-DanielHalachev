@@ -1,11 +1,11 @@
 #pragma once
-#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "Ray.h"
 #include "SceneSettings.h"
 #include "tracer/Camera.h"
+#include "tracer/Triangle.h"
 #include "tracer/Vector.h"
 
 typedef Vector ColorVector;
@@ -15,8 +15,8 @@ class RayTracer {
  private:
   struct IntersectionInformation {
     Vector intersectionPoint;
-    size_t objectIndex;
-    size_t triangleIndex;
+    const Mesh *const object;
+    const Triangle *const triangle;
   };
 
   bool rayUpdateRequired;
@@ -32,7 +32,7 @@ class RayTracer {
 
  public:
   explicit RayTracer(const std::string &pathToScene);
-  const Camera getCamera() const;
+  const Camera &getCamera() const;
   Camera &setCamera();
   void render();
   void writePPM(const std::string &pathToImage);

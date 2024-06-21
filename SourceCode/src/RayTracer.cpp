@@ -2,7 +2,6 @@
 #include "tracer/RayTracer.h"
 
 #include <cmath>
-#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -20,7 +19,7 @@ RayTracer::RayTracer(const std::string &pathToScene) : rayUpdateRequired(true), 
   this->scene = SceneParser::parseScene(pathToScene);
 };
 
-const Camera RayTracer::getCamera() const {
+const Camera &RayTracer::getCamera() const {
   return this->scene.camera;
 }
 
@@ -78,10 +77,12 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
   }
   std::optional<IntersectionInformation> intersectionInformation = trace(ray);
   if (intersectionInformation.has_value()) {
-    Vector intersectionPoint = intersectionInformation->intersectionPoint;
-    Mesh mesh = this->scene.objects[intersectionInformation->objectIndex];
-    Triangle triangle = mesh.triangles[intersectionInformation->triangleIndex];
+    const Vector &intersectionPoint = intersectionInformation->intersectionPoint;
+    const Mesh &mesh = *intersectionInformation->object;
+    const Triangle &triangle = *intersectionInformation->triangle;
+
     Vector finalColor(0, 0, 0);
+
     for (auto &light : this->scene.lights) {
       Vector lightDirection = light.position - intersectionPoint;
       float sphereRadius = lightDirection.length();
@@ -93,13 +94,14 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
       bool shadowRayIntersection = hasIntersection(shadowRay);
 
       Vector lightContribution =
-          shadowRayIntersection ? Vector(0, 0, 0)
-                                : (static_cast<float>(light.intentsity) / sphereArea * triangle.texture.albedo * angle);
+          shadowRayIntersection
+              ? Vector(0, 0, 0)
+              : (static_cast<float>(light.intentsity) / sphereArea * triangle.getTexture().albedo * angle);
       // std::optional<IntersectionInformation> shadowRayIntersection = trace(shadowRay);
 
       // Vector lightContribution =
       //     !shadowRayIntersection.has_value() ? Vector(0, 0, 0)
-      //                           : (static_cast<float>(light.intentsity) / sphereArea * triangle.texture.albedo *
+      //                           : (static_cast<float>(light.intentsity) / sphereArea * triangle.getTexture().albedo *
       //                           angle);
       finalColor += lightContribution;
     }
@@ -111,39 +113,35 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
 std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ray) const {
   float minDistance = INFINITY;
   std::optional<Vector> intersectionPoint = {};
-  size_t intersectedObjectIndex = 0;
-  size_t intersectedTriangleIndex = 0;
+  const Mesh *intersectedObject = nullptr;
+  const Triangle *intersectedTriangle = nullptr;
 
-  for (auto objectIndex = 0; objectIndex < this->scene.objects.size(); objectIndex++) {
-    for (auto triangleIndex = 0; triangleIndex < this->scene.objects[objectIndex].triangles.size(); triangleIndex++) {
-      std::optional<Vector> tempIntersectionPoint =
-          ray.intersectWithTriangle(this->scene.objects[objectIndex].triangles[triangleIndex]);
+  for (auto &object : this->scene.objects) {
+    for (auto &triangle : object.triangles) {
+      std::optional<Vector> tempIntersectionPoint = ray.intersectWithTriangle(triangle);
       if (tempIntersectionPoint.has_value()) {
         float distance = tempIntersectionPoint.value().length();
         if (distance < minDistance) {
           minDistance = distance;
           intersectionPoint = tempIntersectionPoint.value();
-          intersectedObjectIndex = objectIndex;
-          intersectedTriangleIndex = triangleIndex;
+          intersectedObject = &object;
+          intersectedTriangle = &triangle;
         }
       }
     }
   }
   if (intersectionPoint.has_value()) {
-    return IntersectionInformation{intersectionPoint.value(), intersectedObjectIndex, intersectedTriangleIndex};
+    return IntersectionInformation{intersectionPoint.value(), intersectedObject, intersectedTriangle};
   }
   return {};
 }
 
 bool RayTracer::hasIntersection(const Ray &ray) const {
   float minDistance = INFINITY;
-  std::optional<Vector> intersectionPoint = {};
 
-  for (auto objectIndex = 0; objectIndex < this->scene.objects.size(); objectIndex++) {
-    for (auto triangleIndex = 0; triangleIndex < this->scene.objects[objectIndex].triangles.size(); triangleIndex++) {
-      std::optional<Vector> tempIntersectionPoint =
-          ray.intersectWithTriangle(this->scene.objects[objectIndex].triangles[triangleIndex]);
-      if (tempIntersectionPoint.has_value()) {
+  for (auto &object : this->scene.objects) {
+    for (auto &triangle : object.triangles) {
+      if (ray.intersectWithTriangle(triangle).has_value()) {
         return true;
       }
     }

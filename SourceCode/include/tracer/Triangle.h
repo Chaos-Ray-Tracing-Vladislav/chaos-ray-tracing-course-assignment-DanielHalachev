@@ -9,18 +9,20 @@
 
 struct Light;
 
-struct Triangle {
+class Triangle {
  private:
   std::array<Vector, TRIANGLE_NUM_VERTICES> vertices;
+  Texture texture;
   Vector normal;
-  Vector getNormal() const;
+  Vector calculateNormal() const;
 
  public:
-  Texture texture;
   Triangle();
-  explicit Triangle(std::array<Vector, 3> &vertices);
+  explicit Triangle(const std::array<Vector, 3> &vertices);
   Vector &operator[](unsigned short i);
+  const Texture &getTexture() const;
+  Texture &setTexture();
   const Vector &operator[](unsigned short i) const;
-  Vector getTriangleNormal() const;
+  const Vector &getTriangleNormal() const;
   float area() const;
 };
