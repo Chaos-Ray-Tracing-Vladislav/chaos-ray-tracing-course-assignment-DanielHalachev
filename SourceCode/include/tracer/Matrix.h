@@ -136,9 +136,9 @@ Matrix<Dimension> operator*(const Matrix<Dimension>& left, const Matrix<Dimensio
 
 inline Vector operator*(const Vector& left, const Matrix<3>& right) {
   Vector result;
-  return Vector(left.x * right[0][0] + left.y * right[1][0] + left.z * right[2][0],   // x
-                left.x * right[0][1] + left.y * right[1][1] + left.z * right[2][1],   // y
-                left.x * right[0][2] + left.y * right[1][2] + left.z * right[2][2]);  // z
+  return Vector(left[0] * right[0][0] + left[1] * right[1][0] + left[2] * right[2][0],   // x
+                left[0] * right[0][1] + left[1] * right[1][1] + left[2] * right[2][1],   // y
+                left[0] * right[0][2] + left[1] * right[1][2] + left[2] * right[2][2]);  // z
 }
 
 template <size_t Dimension>
@@ -157,8 +157,8 @@ Matrix<Dimension>& operator*=(Matrix<Dimension>& left, const Matrix<Dimension>& 
 }
 
 inline Vector& operator*=(Vector& left, const Matrix<3>& right) {
-  left = Vector(left.x * right[0][0] + left.y * right[1][0] + left.z * right[2][0],   // x
-                left.x * right[0][1] + left.y * right[1][1] + left.z * right[2][1],   // y
-                left.x * right[0][2] + left.y * right[1][2] + left.z * right[2][2]);  // z
+  left = Vector(left[0] * right[0][0] + left[1] * right[1][0] + left[2] * right[2][0],   // x
+                left[0] * right[0][1] + left[1] * right[1][1] + left[2] * right[2][1],   // y
+                left[0] * right[0][2] + left[1] * right[1][2] + left[2] * right[2][2]);  // z
   return left;
 }

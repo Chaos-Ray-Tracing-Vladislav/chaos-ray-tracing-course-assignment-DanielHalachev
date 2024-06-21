@@ -2,79 +2,78 @@
 
 #include <cmath>
 #include <istream>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
-Vector::Vector() : x(0.0f), y(0.0f), z(0.0f){};
+Vector::Vector() : values{{0.0f, 0.0f, 0.0f}} {}
 
-Vector::Vector(float x, float y, float z) : x(x), y(y), z(z){};
+Vector::Vector(float x, float y, float z) : values{{x, y, z}} {}
 
 Vector::Vector(const std::vector<float>& values) {
-  this->x = values[0];
-  this->y = values[1];
-  this->z = values[2];
+  if (values.size() != 3) {
+    throw std::invalid_argument("Vector must have exactly 3 elements.");
+  }
+  this->values = {values[0], values[1], values[2]};
 }
 
 const float& Vector::operator[](const unsigned short index) const {
-  switch (index) {
-    case 0:
-      return this->x;
-    case 1:
-      return this->y;
-    case 2:
-      return this->z;
-    default:
-      throw std::out_of_range("Invalid range");
+  if (index >= 3) {
+    throw std::out_of_range("Invalid range");
   }
+  return this->values[index];
 }
+
 float& Vector::operator[](const unsigned short index) {
-  switch (index) {
-    case 0:
-      return this->x;
-    case 1:
-      return this->y;
-    case 2:
-      return this->z;
-    default:
-      throw std::out_of_range("Invalid range");
+  if (index >= 3) {
+    throw std::out_of_range("Invalid range");
   }
+  return this->values[index];
 }
+
 Vector Vector::operator-(const Vector& other) const {
-  return {this->x - other.x, this->y - other.y, this->z - other.z};
+  return {
+      this->values[0] - other.values[0],  // x
+      this->values[1] - other.values[1],  // y
+      this->values[2] - other.values[2]   // z
+  };
 }
 
 Vector Vector::operator+(const Vector& other) const {
-  return {this->x + other.x, this->y + other.y, this->z + other.z};
+  return {
+      this->values[0] + other.values[0],  // x
+      this->values[1] + other.values[1],  // y
+      this->values[2] + other.values[2]   // z
+  };
 }
 
 Vector& Vector::operator+=(const Vector& other) {
-  this->x += other.x;
-  this->y += other.y;
-  this->z += other.z;
+  this->values[0] += other.values[0];
+  this->values[1] += other.values[1];
+  this->values[2] += other.values[2];
   return *this;
 }
 
 float Vector::dot(const Vector& other) const {
-  return this->x * other.x + this->y * other.y + this->z * other.z;
+  return this->values[0] * other.values[0] + this->values[1] * other.values[1] + this->values[2] * other.values[2];
 }
 
 Vector Vector::operator*(const Vector& other) const {
-  return Vector(this->y * other.z - this->z * other.y,  // x
-                this->z * other.x - this->x * other.z,  // y
-                this->x * other.y - this->y * other.x   // x
-  );
+  return {this->values[1] * other.values[2] - this->values[2] * other.values[1],   // x
+          this->values[2] * other.values[0] - this->values[0] * other.values[2],   // y
+          this->values[0] * other.values[1] - this->values[1] * other.values[0]};  // z
 }
 
 Vector Vector::operator*(float scalar) const {
-  return Vector(this->x * scalar, this->y * scalar, this->z * scalar);
+  return {this->values[0] * scalar, this->values[1] * scalar, this->values[2] * scalar};
 }
 
 Vector operator*(float lhs, const Vector& rhs) {
-  return Vector(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+  return {lhs * rhs.values[0], lhs * rhs.values[1], lhs * rhs.values[2]};
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector& vector) {
-  os << "[" << vector.x << "," << vector.y << "," << vector.z << "]";
+  os << "[" << vector.values[0] << "," << vector.values[1] << "," << vector.values[2] << "]";
   return os;
 }
 
@@ -82,18 +81,25 @@ std::istream& operator>>(std::istream& is, Vector& vector) {
   char leftBracket = '[';
   char rightBracket = ']';
   char delim = ',';
-  is >> leftBracket >> vector.x >> delim >> vector.y >> delim >> vector.z >> rightBracket;
+  is >> leftBracket >> vector.values[0] >> delim >> vector.values[1] >> delim >> vector.values[2] >> rightBracket;
   return is;
 }
 
 void Vector::normalize() {
   float length = this->length();
-  length = 1 / length;
-  this->x = this->x * length;
-  this->y = this->y * length;
-  this->z = this->z * length;
+  length = 1.0f / length;
+  values[0] *= length;
+  values[1] *= length;
+  values[2] *= length;
 }
 
 float Vector::length() const {
-  return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
+  return std::sqrt(this->values[0] * this->values[0] + this->values[1] * this->values[1] +
+                   this->values[2] * this->values[2]);
+}
+
+Vector Vector::generateRandom() {
+  std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+  std::mt19937 rng(std::random_device{}());
+  return Vector(distribution(rng), distribution(rng), distribution(rng));
 }

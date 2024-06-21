@@ -4,7 +4,7 @@
 #include "tracer/RayTracer.h"
 
 int main() {
-  for (short i = 3; i < 4; i++) {
+  for (short i = 0; i < 4; i++) {
     std::cout << i << '\n';
     RayTracer tracer("/home/daniel/scene" + std::to_string(i) + ".crtscene");
     tracer.render();

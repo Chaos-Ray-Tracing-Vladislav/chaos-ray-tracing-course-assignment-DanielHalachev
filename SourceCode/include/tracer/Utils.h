@@ -3,19 +3,21 @@
 
 #include "tracer/Vector.h"
 
-struct Color {
-  static const Color black;
-  static const Color white;
-  static Color randomColor();
+typedef Vector Color;
 
-  float red;
-  float green;
-  float blue;
+// struct Color {
+//   static const Color black;
+//   static const Color white;
+//   static Color randomColor();
 
-  Color();
-  explicit Color(const Vector &rgb);
-  Color(float red, float green, float blue);
-};
+//   float red;
+//   float green;
+//   float blue;
+
+//   Color();
+//   explicit Color(const Vector &rgb);
+//   Color(float red, float green, float blue);
+// };
 
 struct PPMColor {
   unsigned short red;

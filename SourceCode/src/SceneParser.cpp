@@ -65,7 +65,7 @@ SceneSettings SceneParser::parseSceneSettings(const rapidjson::Document& documen
     const rapidjson::Value& backgroundColorValue = settingsValue.FindMember(SceneParser::BG_COLOR)->value;
     assert(!backgroundColorValue.IsNull() && backgroundColorValue.IsArray());
     auto tempArray = backgroundColorValue.GetArray();
-    sceneSettings.sceneBackgroundColor = Color(Vector(loadFloatSTLVector(backgroundColorValue.GetArray(), 3)));
+    sceneSettings.sceneBackgroundColor = Vector(loadFloatSTLVector(backgroundColorValue.GetArray(), 3));
 
     const rapidjson::Value& imageSettingsValue = settingsValue.FindMember(SceneParser::IMAGE_SETTINGS)->value;
     if (!imageSettingsValue.IsNull() && settingsValue.IsObject()) {
