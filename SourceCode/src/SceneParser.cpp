@@ -17,7 +17,9 @@ const char* SceneParser::BG_COLOR = "background_color";
 const char* SceneParser::IMAGE_SETTINGS = "image_settings";
 const char* SceneParser::CAMERA = "camera";
 const char* SceneParser::CAMERA_MATRIX = "matrix";
-const char* SceneParser::CAMERA_POSITION = "position";
+const char* SceneParser::LIGHTS = "lights";
+const char* SceneParser::LIGHT_INTENSITY = "intensity";
+const char* SceneParser::POSITION = "position";
 const char* SceneParser::SCENE_OBJECTS = "objects";
 const char* SceneParser::VERTICES = "vertices";
 const char* SceneParser::TRIANGLES = "triangles";
@@ -32,7 +34,8 @@ Scene SceneParser::parseScene(const std::string& pathToScene) {
   rapidjson::Document document;
   document.ParseStream(isWrapper);
 
-  return Scene{parseSceneSettings(document), parseCameraSettings(document), parseSceneObjects(document)};
+  return Scene{parseSceneSettings(document), parseCameraSettings(document), parseLightSettings(document),
+               parseSceneObjects(document)};
 };
 
 template <typename T>
@@ -62,9 +65,7 @@ SceneSettings SceneParser::parseSceneSettings(const rapidjson::Document& documen
     const rapidjson::Value& backgroundColorValue = settingsValue.FindMember(SceneParser::BG_COLOR)->value;
     assert(!backgroundColorValue.IsNull() && backgroundColorValue.IsArray());
     auto tempArray = backgroundColorValue.GetArray();
-    sceneSettings.sceneBackgroundColor = {static_cast<unsigned short>(tempArray[0].GetFloat() * 255),
-                                          static_cast<unsigned short>(tempArray[1].GetFloat() * 255),
-                                          static_cast<unsigned short>(tempArray[2].GetFloat() * 255)};
+    sceneSettings.sceneBackgroundColor = Color(Vector(loadFloatSTLVector(backgroundColorValue.GetArray(), 3)));
 
     const rapidjson::Value& imageSettingsValue = settingsValue.FindMember(SceneParser::IMAGE_SETTINGS)->value;
     if (!imageSettingsValue.IsNull() && settingsValue.IsObject()) {
@@ -83,7 +84,7 @@ Camera SceneParser::parseCameraSettings(const rapidjson::Document& document) {
 
   const rapidjson::Value& cameraValue = document.FindMember(SceneParser::CAMERA)->value;
   if (!cameraValue.IsNull() && cameraValue.IsObject()) {
-    const rapidjson::Value& cameraPositionValue = cameraValue.FindMember(SceneParser::CAMERA_POSITION)->value;
+    const rapidjson::Value& cameraPositionValue = cameraValue.FindMember(SceneParser::POSITION)->value;
     assert(!cameraPositionValue.IsNull() && cameraPositionValue.IsArray());
     camera.setPosition() = Vector(loadFloatSTLVector(cameraPositionValue.GetArray(), 3));
 
@@ -92,6 +93,23 @@ Camera SceneParser::parseCameraSettings(const rapidjson::Document& document) {
     camera.setRotationMatrix() = Matrix<3>(loadFloatSTLVector(cameraMatrixValue.GetArray(), 9));
   }
   return camera;
+}
+
+std::vector<Light> SceneParser::parseLightSettings(const rapidjson::Document& document) {
+  std::vector<Light> lights;
+  const rapidjson::Value& lightsValue = document.FindMember(SceneParser::LIGHTS)->value;
+  if (!lightsValue.IsNull() && lightsValue.IsArray()) {
+    lights.reserve(lightsValue.GetArray().Size());
+    for (auto& light : lightsValue.GetArray()) {
+      const rapidjson::Value& lightIntensityValue = light.FindMember(SceneParser::LIGHT_INTENSITY)->value;
+      assert(!lightIntensityValue.IsNull() && lightIntensityValue.IsInt());
+      const rapidjson::Value& lightPositionValue = light.FindMember(SceneParser::POSITION)->value;
+      assert(!lightPositionValue.IsNull() && lightPositionValue.IsArray());
+      Light temp = {Vector(loadFloatSTLVector(lightPositionValue.GetArray(), 3)), lightIntensityValue.GetUint()};
+      lights.push_back(temp);
+    }
+  }
+  return lights;
 }
 
 std::vector<Mesh> SceneParser::parseSceneObjects(const rapidjson::Document& document) {

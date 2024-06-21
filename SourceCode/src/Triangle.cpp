@@ -1,17 +1,14 @@
 #include <tracer/Triangle.h>
 
-#include <algorithm>
+// #include <algorithm>
 #include <array>
-#include <istream>
-#include <random>
+// #include <random>
 
 #include "tracer/Utils.h"
 #include "tracer/Vector.h"
 
-Triangle::Triangle() : color(Color::randomColor()) {
-  this->normal = getTriangleNormal();
-};
-Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices), color(Color::randomColor()) {
+Triangle::Triangle() = default;
+Triangle::Triangle(std::array<Vector, 3> &vertices) : vertices(vertices), texture(Texture()) {
   // I am not sure if this is the right way to do this
   // float slope = (this->vertices[1].x - this->vertices[0].x) * (this->vertices[2].y - this->vertices[0].y) -
   //               (this->vertices[1].y - this->vertices[0].y) * (this->vertices[2].x - this->vertices[0].x);
@@ -33,11 +30,6 @@ Vector &Triangle::operator[](unsigned short i) {
 
 const Vector &Triangle::operator[](unsigned short i) const {
   return this->vertices[i];
-}
-
-std::istream &operator>>(std::istream &is, Triangle &triangle) {
-  is >> triangle.vertices[0] >> triangle.vertices[1] >> triangle.vertices[2];
-  return is;
 }
 
 Vector Triangle::getNormal() const {
