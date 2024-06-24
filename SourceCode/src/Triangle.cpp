@@ -50,6 +50,27 @@ const Vector &Triangle::getTriangleNormal() const {
   return this->normal;
 }
 
+bool Triangle::pointIsInTriangle(const Vector &point) const {
+  Vector e0 = this->vertices[1] - this->vertices[0];
+  Vector c0 = point - this->vertices[0];
+  if (this->normal.dot(e0 * c0) < 0) {
+    return false;
+  }
+
+  Vector e1 = this->vertices[2] - this->vertices[1];
+  Vector c1 = point - this->vertices[1];
+  if (this->normal.dot(e1 * c1) < 0) {
+    return false;
+  }
+
+  Vector e2 = this->vertices[0] - this->vertices[2];
+  Vector c2 = point - this->vertices[2];
+  if (this->normal.dot(e2 * c2) < 0) {
+    return false;
+  }
+  return true;
+}
+
 float Triangle::area() const {
   return this->getTriangleNormal().length() / 2;
 }

@@ -27,8 +27,8 @@ class RayTracer {
   void updateRays();
   Color shootRay(const Ray &ray, const unsigned int depth = 0) const;
   Color shade(const Ray &ray) const;
-  std::optional<RayTracer::IntersectionInformation> trace(const Ray &ray) const;
-  bool hasIntersection(const Ray &ray) const;
+  std::optional<RayTracer::IntersectionInformation> trace(const RayBase &ray) const;
+  bool hasIntersection(const RayBase &ray) const;
 
  public:
   explicit RayTracer(const std::string &pathToScene);

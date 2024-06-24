@@ -1,15 +1,72 @@
 #include <tracer/Ray.h>
 
 // #include <limits>
+#include <cmath>
+#include <limits>
 #include <optional>
 
 #include "tracer/Triangle.h"
 #include "tracer/Vector.h"
 
-Ray::Ray() = default;
+RayBase::RayBase() = default;
 
-Ray::Ray(const Vector& origin, const Vector& direction) : origin(origin), direction(direction){};
+RayBase::RayBase(const Vector& origin, const Vector& direction) : origin(origin), direction(direction){};
 
+#if 0
+
+std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle, const Vector& cameraPosition) const {
+  Vector triangleNormal = triangle.getTriangleNormal();
+  float normalDotRayDirection = this->direction.dot(triangleNormal);
+
+  //   if (normalDotRayDirection >= 0) {
+  //     return {};
+  //   }
+
+  // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
+  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+  //   return {};
+  // }
+
+  float distanceToPlane = (triangle[0] - cameraPosition).dot(triangleNormal);
+
+  float t = distanceToPlane / normalDotRayDirection;
+
+  Vector intersectionPoint = this->origin + t * this->direction;
+
+  if (!triangle.pointIsInTriangle(intersectionPoint)) {
+    return {};
+  }
+
+  return intersectionPoint;
+}
+
+std::optional<Vector> ShadowRay::intersectWithTriangle(const Triangle& triangle, const Vector& cameraPosition) const {
+  Vector triangleNormal = triangle.getTriangleNormal();
+  float normalDotRayDirection = this->direction.dot(triangleNormal);
+
+  if (normalDotRayDirection == 0) {
+    return {};
+  }
+
+  // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
+  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+  //   return {};
+  // }
+
+  float distanceToPlane = (triangle[0] - cameraPosition).dot(triangleNormal);
+
+  float t = distanceToPlane / normalDotRayDirection;
+
+  Vector intersectionPoint = this->origin + t * this->direction;
+
+  if (!triangle.pointIsInTriangle(intersectionPoint)) {
+    return {};
+  }
+
+  return intersectionPoint;
+}
+
+#else
 std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const {
   Vector triangleNormal = triangle.getTriangleNormal();
   float normalDotRayDirection = this->direction.dot(triangleNormal);
@@ -19,75 +76,46 @@ std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const
   }
 
   // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
-  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
-  //   return {};
-  // }
+  //   if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+  //     return {};
+  //   }
 
-  float distanceToPlane = (triangle[0] - this->origin).dot(triangleNormal);
+  float distanceToPlane = -(triangle[0]).dot(triangleNormal);
 
-  float t = distanceToPlane / normalDotRayDirection;
-
-  Vector intersectionPoint = this->origin + t * this->direction;
-
-  Vector e0 = triangle[1] - triangle[0];
-  Vector c0 = intersectionPoint - triangle[0];
-  if (triangleNormal.dot(e0 * c0) < 0) {
+  float t = -(triangleNormal.dot(this->origin) + distanceToPlane) / normalDotRayDirection;
+  if (t < 0) {
     return {};
   }
+  Vector intersectionPoint = this->origin + this->direction * t;
 
-  Vector e1 = triangle[2] - triangle[1];
-  Vector c1 = intersectionPoint - triangle[1];
-  if (triangleNormal.dot(e1 * c1) < 0) {
-    return {};
-  }
-
-  Vector e2 = triangle[0] - triangle[2];
-  Vector c2 = intersectionPoint - triangle[2];
-  if (triangleNormal.dot(e2 * c2) < 0) {
+  if (!triangle.pointIsInTriangle(intersectionPoint)) {
     return {};
   }
 
   return intersectionPoint;
 }
 
-// std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const {
-//   Vector triangleNormal = triangle.getTriangleNormal();
-//   float normalDotRayDirection = this->direction.dot(triangleNormal);
+std::optional<Vector> ShadowRay::intersectWithTriangle(const Triangle& triangle) const {
+  Vector triangleNormal = triangle.getTriangleNormal();
+  float normalDotRayDirection = this->direction.dot(triangleNormal);
 
-//   if (normalDotRayDirection >= 0) {
-//     return {};
-//   }
+  // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
+  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+  //   return {};
+  // }
 
-//   // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
-//   // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
-//   //   return {};
-//   // }
+  float distanceToPlane = -(triangle[0]).dot(triangleNormal);
 
-//   float distanceToPlane = -(triangle[0] - this->origin).dot(triangleNormal);
+  float t = -(triangleNormal.dot(this->origin) + distanceToPlane) / normalDotRayDirection;
+  if (t < 0) {
+    return {};
+  }
+  Vector intersectionPoint = this->origin + this->direction * t;
 
-//   float t = -(triangleNormal.dot(this->origin) + distanceToPlane) / normalDotRayDirection;
-//   if (t < 0) {
-//     return {};
-//   }
-//   Vector intersectionPoint = this->origin + this->direction * t;
+  if (!triangle.pointIsInTriangle(intersectionPoint)) {
+    return {};
+  }
 
-//   Vector e0 = triangle[1] - triangle[0];
-//   Vector c0 = intersectionPoint - triangle[0];
-//   if (triangleNormal.dot(e0 * c0) < 0) {
-//     return {};
-//   }
-
-//   Vector e1 = triangle[2] - triangle[1];
-//   Vector c1 = intersectionPoint - triangle[1];
-//   if (triangleNormal.dot(e1 * c1) < 0) {
-//     return {};
-//   }
-
-//   Vector e2 = triangle[0] - triangle[2];
-//   Vector c2 = intersectionPoint - triangle[2];
-//   if (triangleNormal.dot(e2 * c2) < 0) {
-//     return {};
-//   }
-
-//   return intersectionPoint;
-// }
+  return intersectionPoint;
+}
+#endif

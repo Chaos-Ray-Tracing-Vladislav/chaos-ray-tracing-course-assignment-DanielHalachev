@@ -93,14 +93,8 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
       lightDirection.normalize();
       float angle = std::max(0.0f, lightDirection.dot(triangle.getTriangleNormal()));
 
-      Ray shadowRay(intersectionPoint + triangle.getTriangleNormal() * SHADOW_BIAS, lightDirection);
-      // TODO (bug)
-      // for scene 0 hasIntersection or trace().has_value() never return true
-      // for the ground surface shadow ray
+      ShadowRay shadowRay(intersectionPoint + triangle.getTriangleNormal() * SHADOW_BIAS, lightDirection);
       bool shadowRayIntersection = hasIntersection(shadowRay);
-      if (mesh.triangles.size() == 2 && shadowRayIntersection) {
-        std::cout << "success\n";
-      }
 
       if (!shadowRayIntersection) {
         float lightContribution = (static_cast<float>(light.intentsity) / sphereArea * angle);
@@ -112,7 +106,7 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
   return this->scene.sceneSettings.sceneBackgroundColor;
 }
 
-std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ray) const {
+std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const RayBase &ray) const {
   float minDistance = std::numeric_limits<float>::infinity();
   std::optional<Vector> intersectionPoint = {};
   const Mesh *intersectedObject = nullptr;
@@ -138,7 +132,7 @@ std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ra
   return {};
 }
 
-bool RayTracer::hasIntersection(const Ray &ray) const {
+bool RayTracer::hasIntersection(const RayBase &ray) const {
   for (auto &object : this->scene.objects) {
     for (auto &triangle : object.triangles) {
       if (ray.intersectWithTriangle(triangle).has_value()) {

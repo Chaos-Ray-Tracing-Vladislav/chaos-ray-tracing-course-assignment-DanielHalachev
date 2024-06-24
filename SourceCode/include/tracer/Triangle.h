@@ -24,5 +24,6 @@ class Triangle {
   Texture &setTexture();
   const Vector &operator[](unsigned short i) const;
   const Vector &getTriangleNormal() const;
+  bool pointIsInTriangle(const Vector &point) const;
   float area() const;
 };
