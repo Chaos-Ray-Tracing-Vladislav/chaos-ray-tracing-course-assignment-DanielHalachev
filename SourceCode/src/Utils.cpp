@@ -15,6 +15,6 @@ std::ostream &operator<<(std::ostream &os, const struct PPMColor &color) {
   return os;
 }
 
-Texture::Texture() : color{Color::generateRandom()}, albedo{0.18f, 0.18f, 0.18f} {};
+Texture::Texture() : color{Color::generateRandom()}, albedo{0.82f, 0.82f, 0.82f} {};
 
 Texture::Texture(const Color &color, const Vector &albedo) : color{color}, albedo{albedo} {};

@@ -1,9 +1,9 @@
 
 #include "tracer/RayTracer.h"
 
-#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <vector>
 
@@ -14,6 +14,8 @@
 #include "tracer/Triangle.h"
 #include "tracer/Utils.h"
 #include "tracer/Vector.h"
+
+const float PI = (22.0f / 7.0f);
 
 RayTracer::RayTracer(const std::string &pathToScene) : rayUpdateRequired(true), renderRequired(true) {
   this->scene = SceneParser::parseScene(pathToScene);
@@ -38,6 +40,7 @@ void RayTracer::updateRays() {
   for (auto &row : this->colorBuffer) {
     row.resize(this->scene.sceneSettings.image.width);
   }
+
   for (unsigned int pixelRow = 0; pixelRow < this->scene.sceneSettings.image.height; pixelRow++) {
     for (unsigned int pixelCol = 0; pixelCol < this->scene.sceneSettings.image.width; pixelCol++) {
       float x = static_cast<float>(pixelCol) + 0.5f;
@@ -86,24 +89,23 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
     for (auto &light : this->scene.lights) {
       Vector lightDirection = light.position - intersectionPoint;
       float sphereRadius = lightDirection.length();
-      float sphereArea = 4 * sphereRadius * sphereRadius * (22.0f / 7.0f);
+      float sphereArea = 4 * sphereRadius * sphereRadius * PI;
       lightDirection.normalize();
       float angle = std::max(0.0f, lightDirection.dot(triangle.getTriangleNormal()));
 
       Ray shadowRay(intersectionPoint + triangle.getTriangleNormal() * SHADOW_BIAS, lightDirection);
+      // TODO (bug)
+      // for scene 0 hasIntersection or trace().has_value() never return true
+      // for the ground surface shadow ray
       bool shadowRayIntersection = hasIntersection(shadowRay);
+      if (mesh.triangles.size() == 2 && shadowRayIntersection) {
+        std::cout << "success\n";
+      }
 
-      Vector lightContribution =
-          shadowRayIntersection
-              ? Vector(0, 0, 0)
-              : (static_cast<float>(light.intentsity) / sphereArea * triangle.getTexture().albedo * angle);
-      // std::optional<IntersectionInformation> shadowRayIntersection = trace(shadowRay);
-
-      // Vector lightContribution =
-      //     !shadowRayIntersection.has_value() ? Vector(0, 0, 0)
-      //                           : (static_cast<float>(light.intentsity) / sphereArea * triangle.getTexture().albedo *
-      //                           angle);
-      finalColor += lightContribution;
+      if (!shadowRayIntersection) {
+        float lightContribution = (static_cast<float>(light.intentsity) / sphereArea * angle);
+        finalColor += lightContribution * triangle.getTexture().albedo;
+      }
     }
     return Color(finalColor);
   }
@@ -111,7 +113,7 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
 }
 
 std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ray) const {
-  float minDistance = INFINITY;
+  float minDistance = std::numeric_limits<float>::infinity();
   std::optional<Vector> intersectionPoint = {};
   const Mesh *intersectedObject = nullptr;
   const Triangle *intersectedTriangle = nullptr;
@@ -120,7 +122,7 @@ std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ra
     for (auto &triangle : object.triangles) {
       std::optional<Vector> tempIntersectionPoint = ray.intersectWithTriangle(triangle);
       if (tempIntersectionPoint.has_value()) {
-        float distance = tempIntersectionPoint.value().length();
+        float distance = (tempIntersectionPoint.value() - ray.origin).length();
         if (distance < minDistance) {
           minDistance = distance;
           intersectionPoint = tempIntersectionPoint.value();
@@ -137,8 +139,6 @@ std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ra
 }
 
 bool RayTracer::hasIntersection(const Ray &ray) const {
-  float minDistance = INFINITY;
-
   for (auto &object : this->scene.objects) {
     for (auto &triangle : object.triangles) {
       if (ray.intersectWithTriangle(triangle).has_value()) {
