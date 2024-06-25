@@ -8,9 +8,9 @@
 #include "tracer/Triangle.h"
 #include "tracer/Vector.h"
 
-RayBase::RayBase() = default;
+Ray::Ray() = default;
 
-RayBase::RayBase(const Vector& origin, const Vector& direction) : origin(origin), direction(direction){};
+Ray::Ray(const Vector& origin, const Vector& direction) : origin(origin), direction(direction){};
 
 #if 0
 
@@ -67,14 +67,15 @@ std::optional<Vector> ShadowRay::intersectWithTriangle(const Triangle& triangle,
 }
 
 #else
-std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const {
+std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle, bool isPrimaryRay) const {
   Vector triangleNormal = triangle.getTriangleNormal();
   float normalDotRayDirection = this->direction.dot(triangleNormal);
 
-  if (normalDotRayDirection >= 0) {
-    return {};
+  if (isPrimaryRay) {
+    if (normalDotRayDirection >= 0) {
+      return {};
+    }
   }
-
   // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
   //   if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
   //     return {};
@@ -95,27 +96,27 @@ std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const
   return intersectionPoint;
 }
 
-std::optional<Vector> ShadowRay::intersectWithTriangle(const Triangle& triangle) const {
-  Vector triangleNormal = triangle.getTriangleNormal();
-  float normalDotRayDirection = this->direction.dot(triangleNormal);
+// std::optional<Vector> ShadowRay::intersectWithTriangle(const Triangle& triangle) const {
+//   Vector triangleNormal = triangle.getTriangleNormal();
+//   float normalDotRayDirection = this->direction.dot(triangleNormal);
 
-  // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
-  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
-  //   return {};
-  // }
+//   // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
+//   // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+//   //   return {};
+//   // }
 
-  float distanceToPlane = -(triangle[0]).dot(triangleNormal);
+//   float distanceToPlane = -(triangle[0]).dot(triangleNormal);
 
-  float t = -(triangleNormal.dot(this->origin) + distanceToPlane) / normalDotRayDirection;
-  if (t < 0) {
-    return {};
-  }
-  Vector intersectionPoint = this->origin + this->direction * t;
+//   float t = -(triangleNormal.dot(this->origin) + distanceToPlane) / normalDotRayDirection;
+//   if (t < 0) {
+//     return {};
+//   }
+//   Vector intersectionPoint = this->origin + this->direction * t;
 
-  if (!triangle.pointIsInTriangle(intersectionPoint)) {
-    return {};
-  }
+//   if (!triangle.pointIsInTriangle(intersectionPoint)) {
+//     return {};
+//   }
 
-  return intersectionPoint;
-}
+//   return intersectionPoint;
+// }
 #endif
