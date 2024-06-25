@@ -95,7 +95,7 @@ void RayTracer::render() {
 #endif  // MEASURE_TIME
 }
 
-Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
+Color RayTracer::shootRay(const Ray<Primary> &ray, const unsigned int depth) const {
   if (depth > MAX_DEPTH) {
     return this->scene.sceneSettings.sceneBackgroundColor;
   }
@@ -114,7 +114,7 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
       lightDirection.normalize();
       float angle = std::max(0.0f, lightDirection.dot(triangle.getTriangleNormal()));
 
-      Ray shadowRay(intersectionPoint + triangle.getTriangleNormal() * SHADOW_BIAS, lightDirection);
+      Ray<Shadow> shadowRay(intersectionPoint + triangle.getTriangleNormal() * SHADOW_BIAS, lightDirection);
       bool shadowRayIntersection = hasIntersection(shadowRay);
 
       if (!shadowRayIntersection) {
@@ -127,7 +127,8 @@ Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
   return this->scene.sceneSettings.sceneBackgroundColor;
 }
 
-std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ray, bool isPrimary) const {
+template <RayType T>
+std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray<T> &ray) const {
   float minDistance = std::numeric_limits<float>::infinity();
   std::optional<Vector> intersectionPoint = {};
   const Mesh *intersectedObject = nullptr;
@@ -135,7 +136,7 @@ std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ra
 
   for (auto &object : this->scene.objects) {
     for (auto &triangle : object.triangles) {
-      std::optional<Vector> tempIntersectionPoint = ray.intersectWithTriangle(triangle, isPrimary);
+      std::optional<Vector> tempIntersectionPoint = ray.intersectWithTriangle(triangle);
       if (tempIntersectionPoint.has_value()) {
         float distance = (tempIntersectionPoint.value() - ray.origin).length();
         if (distance < minDistance) {
@@ -153,10 +154,10 @@ std::optional<RayTracer::IntersectionInformation> RayTracer::trace(const Ray &ra
   return {};
 }
 
-bool RayTracer::hasIntersection(const Ray &ray) const {
+bool RayTracer::hasIntersection(const Ray<Shadow> &ray) const {
   for (auto &object : this->scene.objects) {
     for (auto &triangle : object.triangles) {
-      if (ray.intersectWithTriangle(triangle, false).has_value()) {
+      if (ray.intersectWithTriangle(triangle).has_value()) {
         return true;
       }
     }

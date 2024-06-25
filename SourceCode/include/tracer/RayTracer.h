@@ -22,13 +22,15 @@ class RayTracer {
   bool rayUpdateRequired;
   bool renderRequired;
   Scene scene;
-  std::vector<std::vector<Ray>> pixelRays;
+  std::vector<std::vector<Ray<Primary>>> pixelRays;
   std::vector<std::vector<Color>> colorBuffer;
   void updateRays();
-  Color shootRay(const Ray &ray, const unsigned int depth = 0) const;
-  Color shade(const Ray &ray) const;
-  std::optional<RayTracer::IntersectionInformation> trace(const Ray &ray, bool isPrimaryRay = true) const;
-  bool hasIntersection(const Ray &ray) const;
+  Color shootRay(const Ray<Primary> &ray, const unsigned int depth = 0) const;
+  template <RayType T>
+  Color shade(const Ray<T> &ray) const;
+  template <RayType T>
+  std::optional<RayTracer::IntersectionInformation> trace(const Ray<T> &ray) const;
+  bool hasIntersection(const Ray<Shadow> &ray) const;
 
  public:
   explicit RayTracer(const std::string &pathToScene);
