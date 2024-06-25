@@ -1,6 +1,7 @@
 
 #include "tracer/RayTracer.h"
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -16,6 +17,16 @@
 #include "tracer/Vector.h"
 
 const float PI = (22.0f / 7.0f);
+
+void printProgress(double percentage) {
+  const char *progressBarString = "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||";
+  const int progressBarWidth = 60;
+  int val = static_cast<int>(percentage * 100);
+  int leftPadding = static_cast<int>(percentage * progressBarWidth);
+  int rightPadding = progressBarWidth - leftPadding;
+  printf("\r%3d%% [%.*s%*s]", val, leftPadding, progressBarString, rightPadding, "");
+  fflush(stdout);
+}
 
 RayTracer::RayTracer(const std::string &pathToScene) : rayUpdateRequired(true), renderRequired(true) {
   this->scene = SceneParser::parseScene(pathToScene);
@@ -64,6 +75,7 @@ void RayTracer::updateRays() {
 }
 
 void RayTracer::render() {
+  auto startTime = std::chrono::high_resolution_clock::now();
   if (this->rayUpdateRequired == true) {
     this->updateRays();
   }
@@ -71,7 +83,16 @@ void RayTracer::render() {
     for (unsigned int pixelCol = 0; pixelCol < this->scene.sceneSettings.image.width; pixelCol++) {
       this->colorBuffer[pixelRow][pixelCol] = this->shootRay(this->pixelRays[pixelRow][pixelCol]);
     }
+    printProgress(static_cast<float>(pixelRow) / static_cast<float>(this->scene.sceneSettings.image.height));
   }
+  std::cout << std::endl;
+  this->renderRequired = false;
+
+#if defined(MEASURE_TIME) && MEASURE_TIME
+  auto endTime = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> duration = endTime - startTime;
+  std::cout << duration.count() << "s\n";
+#endif  // MEASURE_TIME
 }
 
 Color RayTracer::shootRay(const Ray &ray, const unsigned int depth) const {
