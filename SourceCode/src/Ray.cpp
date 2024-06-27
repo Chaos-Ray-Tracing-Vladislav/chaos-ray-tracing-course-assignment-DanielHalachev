@@ -1,7 +1,7 @@
 #include <tracer/Ray.h>
 
 #include <cmath>
-#include <limits>
+// #include <limits>
 #include <optional>
 
 #include "tracer/Triangle.h"
@@ -15,20 +15,18 @@ std::optional<Vector> Ray::intersectWithTriangle(const Triangle& triangle) const
   Vector triangleNormal = triangle.getTriangleNormal();
   float normalDotRayDirection = this->direction.dot(triangleNormal);
 
+  if (normalDotRayDirection >= 0) {
+    return {};
+  }
+
   // if N . R ~= 0, the ray is parallel to the plane - no intersection or too far away
-  if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
-    return {};
-  }
+  // if (std::fabs(normalDotRayDirection) < std::numeric_limits<float>::epsilon()) {
+  //   return {};
+  // }
 
-  // TODO(daniel):
-  float distanceToPlane = -(triangle[0] - this->origin).dot(triangleNormal);
+  float distanceToPlane = (triangle[0] - this->origin).dot(triangleNormal);
 
-  float t = -(this->origin.dot(triangleNormal) + distanceToPlane) / (normalDotRayDirection);
-
-  // if t < 0, the triangle is facing in the wrong direction
-  if (t < 0) {
-    return {};
-  }
+  float t = distanceToPlane / normalDotRayDirection;
 
   Vector intersectionPoint = this->origin + t * this->direction;
 

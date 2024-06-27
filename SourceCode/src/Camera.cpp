@@ -6,6 +6,11 @@
 
 #include "tracer/Matrix.h"
 #include "tracer/Vector.h"
+
+float degreesToRadians(const float degrees) {
+  return degrees * (22 / (7 * 180.0f));
+}
+
 Camera::Camera() : position{0, 0, 0}, rotationMatrix{Matrix<3>::IDENTITY_MATRIX} {};
 Camera::Camera(const Vector& position) : position{position}, rotationMatrix{Matrix<3>::IDENTITY_MATRIX} {};
 
@@ -32,7 +37,7 @@ Camera& Camera::truck(const Vector& direction) {
 }
 
 Camera& Camera::pan(const float degrees) {
-  const float radians = degrees * (22 / (7 * 180.0f));
+  const float radians = degreesToRadians(degrees);
   const Matrix rotateAroundYAxis{
       cosf(radians), 0.0f, -sinf(radians),  //
       0.0f,          1.0f, 0.0f,            //
@@ -43,7 +48,7 @@ Camera& Camera::pan(const float degrees) {
 }
 
 Camera& Camera::roll(const float degrees) {
-  const float radians = degrees * (22 / (7 * 180.0f));
+  const float radians = degreesToRadians(degrees);
   const Matrix rotateAroundYAxis{
       cosf(radians), -sinf(radians), 0.0f,  //
       sinf(radians), cosf(radians),  0.0f,  //
@@ -54,7 +59,7 @@ Camera& Camera::roll(const float degrees) {
 }
 
 Camera& Camera::tilt(const float degrees) {
-  const float radians = degrees * (22 / (7 * 180.0f));
+  const float radians = degreesToRadians(degrees);
   const Matrix rotateAroundYAxis{
       1.0f, 0.0f,          0.0f,            //
       0.0f, cosf(radians), -sinf(radians),  //

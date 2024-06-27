@@ -1,10 +1,27 @@
 #pragma once
 #include <string>
-#include <vector>
 
-#include "tracer/Triangle.h"
+#include "rapidjson/document.h"
+#include "tracer/Camera.h"
+#include "tracer/SceneSettings.h"
+
 class SceneParser {
+ private:
+  static const char* SETTINGS;
+  static const char* BG_COLOR;
+  static const char* IMAGE_SETTINGS;
+  static const char* CAMERA;
+  static const char* CAMERA_MATRIX;
+  static const char* CAMERA_POSITION;
+  static const char* SCENE_OBJECTS;
+  static const char* VERTICES;
+  static const char* TRIANGLES;
+
+  static SceneSettings parseSceneSettings(const rapidjson::Document& document);
+  static Camera parseCameraSettings(const rapidjson::Document& document);
+  static std::vector<Mesh> parseSceneObjects(const rapidjson::Document& document);
+
  public:
-  SceneParser();
-  [[nodiscard]] static std::vector<Triangle> parseScene(const std::string &pathToScene);
+  explicit SceneParser();
+  static Scene parseScene(const std::string& pathToScene);
 };

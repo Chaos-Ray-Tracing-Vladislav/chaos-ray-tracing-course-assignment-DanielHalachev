@@ -1,4 +1,7 @@
 #pragma once
+#include <array>
+#include <vector>
+
 #include "tracer/Vector.h"
 template <size_t Dimension = 3>
 class Matrix {
@@ -11,6 +14,8 @@ class Matrix {
 
  public:
   Matrix();
+  explicit Matrix(const std::array<float, Dimension * Dimension>& values);
+  explicit Matrix(const std::vector<float>& values);
   Matrix(const std::initializer_list<float>& values);
   float* operator[](unsigned short index);
   const float* operator[](unsigned short index) const;
@@ -38,6 +43,36 @@ Matrix<Dimension> Matrix<Dimension>::generateIndentityMatrix() {
 
 template <size_t Dimension>
 Matrix<Dimension>::Matrix() = default;
+
+template <size_t Dimension>
+Matrix<Dimension>::Matrix(const std::array<float, Dimension * Dimension>& values) {
+  auto current = values.begin();
+  for (auto i = 0; i < Dimension; i++) {
+    for (auto j = 0; j < Dimension; j++) {
+      if (current != values.end()) {
+        this->table[i][j] = *current;
+        current++;
+      } else {
+        this->table[i][j] = 0;
+      }
+    }
+  }
+}
+
+template <size_t Dimension>
+Matrix<Dimension>::Matrix(const std::vector<float>& values) {
+  auto current = values.begin();
+  for (auto i = 0; i < Dimension; i++) {
+    for (auto j = 0; j < Dimension; j++) {
+      if (current != values.end()) {
+        this->table[i][j] = *current;
+        current++;
+      } else {
+        this->table[i][j] = 0;
+      }
+    }
+  }
+}
 
 template <size_t Dimension>
 Matrix<Dimension>::Matrix(const std::initializer_list<float>& values) {
