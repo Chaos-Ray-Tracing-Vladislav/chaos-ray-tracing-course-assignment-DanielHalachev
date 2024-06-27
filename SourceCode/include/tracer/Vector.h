@@ -1,10 +1,12 @@
 #pragma once
+#include <array>
 #include <ostream>
 #include <vector>
-struct Vector {
-  float x;
-  float y;
-  float z;
+class Vector {
+ protected:
+  std::array<float, 3> values;
+
+ public:
   Vector();
   Vector(float x, float y, float z);
   explicit Vector(const std::vector<float> &values);
@@ -21,4 +23,5 @@ struct Vector {
   friend std::istream &operator>>(std::istream &is, Vector &vector);
   void normalize();
   float length() const;
+  static Vector generateRandom();
 };

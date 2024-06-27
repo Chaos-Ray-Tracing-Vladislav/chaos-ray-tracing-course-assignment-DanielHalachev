@@ -1,0 +1,12 @@
+Dynamic Polymorphism - Function Parameter - Static Polymorphism
+0
+0.706207s - 0.629645s - 0.582761s
+
+1
+22.4928s - 21.4587s - 21.6229s
+
+2
+26.395s - 26.5821s - 26.4147s
+
+3
+515.284s - 528.298s - 519.762s

@@ -1,24 +1,29 @@
 #pragma once
 #include <array>
-#include <istream>
 
 #include "Vector.h"
 #include "tracer/Utils.h"
 
 #define TRIANGLE_NUM_VERTICES 3
-struct Triangle {
+#define SHADOW_BIAS 0.0001f
+
+struct Light;
+
+class Triangle {
  private:
   std::array<Vector, TRIANGLE_NUM_VERTICES> vertices;
+  Texture texture;
   Vector normal;
-  Vector getNormal() const;
+  Vector calculateNormal() const;
 
  public:
-  Color color;
   Triangle();
-  explicit Triangle(std::array<Vector, 3> &vertices);
+  explicit Triangle(const std::array<Vector, 3> &vertices);
   Vector &operator[](unsigned short i);
+  const Texture &getTexture() const;
+  Texture &setTexture();
   const Vector &operator[](unsigned short i) const;
-  friend std::istream &operator>>(std::istream &is, Triangle &triangle);
-  Vector getTriangleNormal() const;
+  const Vector &getTriangleNormal() const;
+  bool pointIsInTriangle(const Vector &point) const;
   float area() const;
 };

@@ -4,6 +4,10 @@
 #include "tracer/Camera.h"
 #include "tracer/Triangle.h"
 #include "tracer/Utils.h"
+#include "tracer/Vector.h"
+
+struct Triangle;
+struct Light;
 
 struct Image {
   unsigned int width;
@@ -15,6 +19,11 @@ struct SceneSettings {
   Image image;
 };
 
+struct Light {
+  Vector position;
+  unsigned int intentsity;
+};
+
 struct Mesh {
   std::vector<Triangle> triangles;
 };
@@ -22,13 +31,6 @@ struct Mesh {
 struct Scene {
   SceneSettings sceneSettings;
   Camera camera;
+  std::vector<Light> lights;
   std::vector<Mesh> objects;
-
-  const Camera& getCamera() const {
-    return this->camera;
-  };
-
-  Camera& setCamera() {
-    return this->camera;
-  };
 };
